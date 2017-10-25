@@ -29,6 +29,7 @@ module RailsAdmin
 
           def parse_value(value)
             return unless value.present?
+            
             if ::Rails.version >= '5'
               abstract_model.model.attribute_types[name.to_s].deserialize(value)
             else

@@ -90,6 +90,7 @@ module RailsAdmin
       end
 
       class WhereBuilder
+        
         def initialize(scope)
           @statements = []
           @values = []
@@ -119,6 +120,7 @@ module RailsAdmin
           scope = scope.references(*@tables.uniq) if @tables.any?
           scope
         end
+        
       end
 
       def query_scope(scope, query, fields = config.list.fields.select(&:queryable?))
@@ -137,7 +139,7 @@ module RailsAdmin
           filters_dump.each do |_, filter_dump|
             wb = WhereBuilder.new(scope)
             field = fields.detect { |f| f.name.to_s == field_name }
-            value = parse_field_value(field, filter_dump[:v])
+            value = filter_dump[:v] # parse_field_value(field, filter_dump[:v]) # filter_dump[:v]
 
             wb.add(field, value, (filter_dump[:o] || 'default'))
             # AND current filter statements to other filter statements
@@ -251,7 +253,16 @@ module RailsAdmin
 
         def build_statement_for_enum
           return if @value.blank?
-          ["(#{@column} IN (?))", Array.wrap(@value)]
+          
+          enum_name = @column.to_s.split('.').last.pluralize
+          if @model.respond_to? enum_name
+            enum_dict = @model.send enum_name
+            values = Array.wrap(@value).map {|key| enum_dict[key]}
+          else
+            values = Array.wrap(@value)
+          end
+          
+          ["(#{@column} IN (?))", values]
         end
 
         def build_statement_for_uuid
