@@ -106,13 +106,17 @@ module RailsAdmin
               else
                 field.parse_value(value)
               end
-            statement, value1, value2 = StatementBuilder.new(column_infos[:column], column_infos[:type], value, operator).to_statement
+            statement, value1, value2 = build_statement(column_infos[:column], column_infos[:type], value, operator)
             @statements << statement if statement.present?
             @values << value1 unless value1.nil?
             @values << value2 unless value2.nil?
             table, column = column_infos[:column].split('.')
             @tables.push(table) if column
           end
+        end
+
+        def build_statement(column, type, value, operator)
+          StatementBuilder.new(column, type, value, operator, @scope.model).to_statement
         end
 
         def build
@@ -147,10 +151,6 @@ module RailsAdmin
           end
         end
         scope
-      end
-
-      def build_statement(column, type, value, operator)
-        StatementBuilder.new(column, type, value, operator).to_statement
       end
 
       class StatementBuilder < RailsAdmin::AbstractModel::StatementBuilder

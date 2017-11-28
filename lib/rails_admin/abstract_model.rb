@@ -115,11 +115,12 @@ module RailsAdmin
     end
 
     class StatementBuilder
-      def initialize(column, type, value, operator)
+      def initialize(column, type, value, operator, model=nil)
         @column = column
         @type = type
         @value = value
         @operator = operator
+        @model = model
       end
 
       def to_statement
